@@ -134,6 +134,13 @@ func (c *mockedConfig) IgnoredFolder(device protocol.DeviceID, folder string) bo
 	return false
 }
 
+func (c *mockedConfig) IgnoredFilePath() string {
+	return ""
+}
+
+func (c *mockedConfig) SetIgnoredFilePath(ignoredFilePath string) {
+}
+
 func (c *mockedConfig) GlobalDiscoveryServers() []string {
 	return nil
 }

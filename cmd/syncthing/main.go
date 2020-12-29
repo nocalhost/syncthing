@@ -190,6 +190,7 @@ type RuntimeOptions struct {
 	logFlags         int
 	showHelp         bool
 	allowNewerConfig bool
+	ignoreFilePath   string
 }
 
 func defaultRuntimeOptions() RuntimeOptions {
@@ -255,6 +256,8 @@ func parseCommandLineOptions() RuntimeOptions {
 	flag.IntVar(&options.logMaxFiles, "log-max-old-files", options.logMaxFiles, "Number of old files to keep (zero to keep only current).")
 	flag.StringVar(&options.auditFile, "auditfile", options.auditFile, "Specify audit file (use \"-\" for stdout, \"--\" for stderr)")
 	flag.BoolVar(&options.allowNewerConfig, "allow-newer-config", false, "Allow loading newer than current config version")
+	flag.StringVar(&options.ignoreFilePath, "ignore-file-path", "", "Specify the path to get the ignore file runtime, or else get from root path of sync folder.")
+
 	if runtime.GOOS == "windows" {
 		// Allow user to hide the console window
 		flag.BoolVar(&options.hideConsole, "no-console", false, "Hide console window")
@@ -608,6 +611,13 @@ func syncthingMain(runtimeOptions RuntimeOptions) {
 	if err != nil {
 		l.Warnln("Failed to initialize config:", err)
 		os.Exit(syncthing.ExitError.AsInt())
+	}
+
+	cfg.SetIgnoredFilePath(runtimeOptions.ignoreFilePath)
+	if runtimeOptions.ignoreFilePath!="" {
+		l.Infof("Setting ignore file path to: %s",runtimeOptions.ignoreFilePath)
+	}else {
+		l.Warnf("No ignore file path sets, syncthing will use .stignore file on the root of the sync folder",runtimeOptions.ignoreFilePath)
 	}
 
 	// Candidate builds should auto upgrade. Make sure the option is set,

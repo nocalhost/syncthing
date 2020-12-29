@@ -1,3 +1,10 @@
+This is a customized version for nocalhost based on v1.12.0 b16cc72fc7b36b7e7ea26aebf7e2c9d81a48cf1b and support the following feature:
+
+- supports specify random ignore file
+
+
+******
+
 [![Syncthing][14]][15]
 
 ---
