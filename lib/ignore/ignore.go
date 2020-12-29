@@ -13,6 +13,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -30,6 +31,7 @@ const (
 	resultInclude    Result = 1 << iota
 	resultDeletable         = 1 << iota
 	resultFoldCase          = 1 << iota
+	pathSeparator           = string(os.PathSeparator)
 )
 
 var defaultResult Result = resultInclude
@@ -177,22 +179,50 @@ func New(fs fs.Filesystem, opts ...Option) *Matcher {
 	return m
 }
 
+// Sequential loading the file and get the first valid one
+func (m *Matcher) Load(paths ...string) error {
+	var lastOne = len(paths) - 1
+	for index, path := range paths {
+		var filesystem = m.fs
+		var file = path
+		if strings.Contains(path, pathSeparator) {
+			var lastSeparator = strings.LastIndex(path, pathSeparator)
+
+			var dir = file[:lastSeparator]
+			file = file[lastSeparator+1:]
+
+			filesystem = fs.NewFilesystem(fs.FilesystemTypeBasic, dir)
+		}
+
+		var loaded, err = m.DoLoad(filesystem, file)
+		if err == nil && loaded {
+			return nil
+		}
+
+		if lastOne == index {
+			return err
+		}
+	}
+	return nil
+}
+
 // Load and parse a file. The returned error may be of type *ParseError in
 // which case a file was loaded from disk but the patterns could not be
 // parsed. In this case the contents of the file are nonetheless available
 // in the Lines() method.
-func (m *Matcher) Load(file string) error {
+func (m *Matcher) DoLoad(fs fs.Filesystem, file string) (bool, error) {
+
 	m.mut.Lock()
 	defer m.mut.Unlock()
 
-	if m.changeDetector.Seen(m.fs, file) && !m.changeDetector.Changed() {
-		return nil
+	if m.changeDetector.Seen(fs, file) && !m.changeDetector.Changed() {
+		return false, nil
 	}
 
-	fd, info, err := loadIgnoreFile(m.fs, file, m.changeDetector)
+	fd, info, err := loadIgnoreFile(fs, file, m.changeDetector)
 	if err != nil {
 		m.parseLocked(&bytes.Buffer{}, file)
-		return err
+		return false, err
 	}
 	defer fd.Close()
 
@@ -202,9 +232,9 @@ func (m *Matcher) Load(file string) error {
 	// If we failed to parse, don't cache, as next time Load is called
 	// we'll pretend it's all good.
 	if err == nil {
-		m.changeDetector.Remember(m.fs, file, info.ModTime())
+		m.changeDetector.Remember(fs, file, info.ModTime())
 	}
-	return err
+	return true, err
 }
 
 // Load and parse an io.Reader. See Load() for notes on the returned error.

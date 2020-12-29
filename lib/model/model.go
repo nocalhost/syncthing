@@ -285,7 +285,7 @@ func (m *model) StartDeadlockDetector(timeout time.Duration) {
 // Need to hold lock on m.fmut when calling this.
 func (m *model) addAndStartFolderLocked(cfg config.FolderConfiguration, fset *db.FileSet, cacheIgnoredFiles bool) {
 	ignores := ignore.New(cfg.Filesystem(), ignore.WithCache(cacheIgnoredFiles))
-	if err := ignores.Load(".stignore"); err != nil && !fs.IsNotExist(err) {
+	if err := ignores.Load(m.cfg.IgnoredFilePath(), ".stignore"); err != nil && !fs.IsNotExist(err) {
 		l.Warnln("Loading ignores:", err)
 	}
 
@@ -1649,7 +1649,7 @@ func (m *model) GetIgnores(folder string) ([]string, []string, error) {
 		ignores = ignore.New(fs.NewFilesystem(cfg.FilesystemType, cfg.Path))
 	}
 
-	err := ignores.Load(".stignore")
+	err := ignores.Load(m.cfg.IgnoredFilePath(), ".stignore")
 	if fs.IsNotExist(err) {
 		// Having no ignores is not an error.
 		return nil, nil, nil

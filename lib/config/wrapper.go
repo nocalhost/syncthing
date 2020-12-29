@@ -84,6 +84,8 @@ type Wrapper interface {
 	AddOrUpdatePendingFolder(id, label string, device protocol.DeviceID)
 	IgnoredDevice(id protocol.DeviceID) bool
 	IgnoredFolder(device protocol.DeviceID, folder string) bool
+	IgnoredFilePath() string
+	SetIgnoredFilePath(ignoredFilePath string)
 
 	Subscribe(c Committer)
 	Unsubscribe(c Committer)
@@ -99,6 +101,7 @@ type wrapper struct {
 	mut    sync.Mutex
 
 	requiresRestart uint32 // an atomic bool
+	ignoredFilePath string // ignored file path
 }
 
 // Wrap wraps an existing Configuration structure and ties it to a file on
@@ -386,6 +389,20 @@ func (w *wrapper) IgnoredFolder(device protocol.DeviceID, folder string) bool {
 		return false
 	}
 	return dev.IgnoredFolder(folder)
+}
+
+func (w *wrapper) IgnoredFilePath() string {
+	return w.ignoredFilePath
+}
+
+func (w *wrapper) SetIgnoredFilePath(ignoredFilePath string){
+	if ignoredFilePath!="" {
+		l.Infof("Specify the ignored file path: %q", ignoredFilePath)
+	}else {
+		l.Infof("IgnoredFilePath no specify")
+	}
+
+	w.ignoredFilePath = ignoredFilePath
 }
 
 // Device returns the configuration for the given device and an "ok" bool.

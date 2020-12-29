@@ -279,7 +279,7 @@ func (f *folder) getHealthErrorAndLoadIgnores() error {
 	if err := f.getHealthErrorWithoutIgnores(); err != nil {
 		return err
 	}
-	if err := f.ignores.Load(".stignore"); err != nil && !fs.IsNotExist(err) {
+	if err := f.ignores.Load(f.model.cfg.IgnoredFilePath(), ".stignore"); err != nil && !fs.IsNotExist(err) {
 		return errors.Wrap(err, "loading ignores")
 	}
 	return nil

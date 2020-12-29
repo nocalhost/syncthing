@@ -22,6 +22,71 @@ import (
 	"github.com/syncthing/syncthing/lib/osutil"
 )
 
+func TestSpecifyIgnoreFileWithRandomPath(t *testing.T) {
+	dir, err := ioutil.TempDir("", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tmpfs := fs.NewFilesystem(fs.FilesystemTypeBasic, dir)
+
+	fd, err := osutil.TempFile(tmpfs, "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer fd.Close()
+	defer tmpfs.Remove(fd.Name())
+
+	// Ignore file matches f1 and f2
+
+	_, err = fd.Write([]byte("#include excludes\n\nbfile\ndir1/cfile\n**/efile\n/ffile\nlost+found"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	pats := New(fs.NewFilesystem(fs.FilesystemTypeBasic, "testdata"), WithCache(true))
+	err = pats.Load(tmpfs.URI() + "/" + fd.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var tests = []struct {
+		f string
+		r bool
+	}{
+		{"afile", false},
+		{"bfile", true},
+		{"cfile", false},
+		{"dfile", false},
+		{"efile", true},
+		{"ffile", true},
+
+		{"dir1", false},
+		{filepath.Join("dir1", "cfile"), true},
+		{filepath.Join("dir1", "dfile"), false},
+		{filepath.Join("dir1", "efile"), true},
+		{filepath.Join("dir1", "ffile"), false},
+
+		{"dir2", false},
+		{filepath.Join("dir2", "cfile"), false},
+		{filepath.Join("dir2", "dfile"), true},
+		{filepath.Join("dir2", "efile"), true},
+		{filepath.Join("dir2", "ffile"), false},
+
+		{filepath.Join("dir3"), true},
+		{filepath.Join("dir3", "afile"), true},
+
+		{"lost+found", true},
+	}
+
+	for i, tc := range tests {
+		if r := pats.Match(tc.f); r.IsIgnored() != tc.r {
+			t.Errorf("Incorrect ignoreFile() #%d (%s); E: %v, A: %v", i, tc.f, tc.r, r)
+		}
+	}
+}
+
 func TestIgnore(t *testing.T) {
 	pats := New(fs.NewFilesystem(fs.FilesystemTypeBasic, "testdata"), WithCache(true))
 	err := pats.Load(".stignore")

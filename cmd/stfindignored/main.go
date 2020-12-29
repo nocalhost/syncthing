@@ -16,6 +16,7 @@ import (
 	"github.com/syncthing/syncthing/lib/ignore"
 )
 
+// todo: adapt changing by Anur
 func main() {
 	flag.Parse()
 	root := flag.Arg(0)
