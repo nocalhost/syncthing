@@ -30,11 +30,12 @@ var (
 	Codename = "Fermium Flea"
 
 	// Set by init()
-	Date        time.Time
-	IsRelease   bool
-	IsCandidate bool
-	IsBeta      bool
-	LongVersion string
+	Date             time.Time
+	IsRelease        bool
+	IsCandidate      bool
+	IsBeta           bool
+	LongVersion      string
+	NocalhostVersion string
 
 	allowedVersionExp = regexp.MustCompile(`^v\d+\.\d+\.\d+(-[a-z0-9]+)*(\.\d+)*(\+\d+-g[0-9a-f]+)?(-[^\s]+)?$`)
 

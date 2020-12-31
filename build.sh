@@ -12,6 +12,8 @@ build() {
 	go run build.go "$@"
 }
 
+nhversion="${3}"
+
 case "${1:-default}" in
 	test)
 		LOGGER_DISCARD=1 build test
@@ -28,6 +30,31 @@ case "${1:-default}" in
 		git add -A gui man AUTHORS
 		git commit -m 'gui, man, authors: Update docs, translations, and contributors'
 		;;
+
+  artifact)
+    case "${2:-all}" in
+      mac)
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${nhversion}"
+      ;;
+
+      linux)
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${nhversion}"
+      ;;
+
+      windows)
+        build
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${nhversion}"
+      ;;
+
+      all)
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${nhversion}"
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${nhversion}"
+      ;;
+    esac
+    ;;
 
 	*)
 		build "$@"
