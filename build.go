@@ -34,23 +34,27 @@ import (
 )
 
 var (
-	goarch        string
-	goos          string
-	noupgrade     bool
-	version       string
-	goCmd         string
-	race          bool
-	debug         = os.Getenv("BUILDDEBUG") != ""
-	extraTags     string
-	installSuffix string
-	pkgdir        string
-	cc            string
-	run           string
-	benchRun      string
-	debugBinary   bool
-	coverage      bool
-	timeout       = "120s"
-	numVersions   = 5
+	goarch           string
+	goos             string
+	noupgrade        bool
+	version          string
+	goCmd            string
+	race             bool
+	debug            = os.Getenv("BUILDDEBUG") != ""
+	extraTags        string
+	installSuffix    string
+	pkgdir           string
+	cc               string
+	run              string
+	benchRun         string
+	nocalhostVersion string
+	_targetName      string
+	_cmd             string
+
+	debugBinary bool
+	coverage    bool
+	timeout     = "120s"
+	numVersions = 5
 )
 
 type target struct {
@@ -258,7 +262,7 @@ func main() {
 
 	// Invoking build.go with no parameters at all builds everything (incrementally),
 	// which is what you want for maximum error checking during development.
-	if flag.NArg() == 0 {
+	if flag.NArg() == 0 && _cmd == "" {
 		runCommand("install", targets["all"])
 	} else {
 		// with any command given but not a target, the target is
@@ -266,14 +270,20 @@ func main() {
 		// syncthing" etc.
 		targetName := "syncthing"
 		if flag.NArg() > 1 {
-			targetName = flag.Arg(1)
+			if _targetName == "" {
+				_targetName = flag.Arg(1)
+				_cmd = flag.Arg(0)
+			}
 		}
 		target, ok := targets[targetName]
 		if !ok {
 			log.Fatalln("Unknown target", target)
 		}
 
-		runCommand(flag.Arg(0), target)
+		fmt.Printf("\n")
+		fmt.Printf("    ---> building %s %s for env %s %s: \n", _cmd, _targetName, goos, goarch)
+		fmt.Printf("    ---> nocalhost versions: %s \n", nocalhostVersion)
+		runCommand(_cmd, target)
 	}
 }
 
@@ -376,6 +386,9 @@ func parseFlags() {
 	flag.IntVar(&numVersions, "num-versions", numVersions, "Number of versions for changelog command")
 	flag.StringVar(&run, "run", "", "Specify which tests to run")
 	flag.StringVar(&benchRun, "bench", "", "Specify which benchmarks to run")
+	flag.StringVar(&_cmd, "cmd", "install", "build cmd")
+	flag.StringVar(&_targetName, "targetName", "all", "build target name")
+	flag.StringVar(&nocalhostVersion, "nocalhostVersion", "", "nocalhost relative version")
 	flag.Parse()
 }
 
@@ -397,7 +410,6 @@ func test(tags []string, pkgs ...string) {
 	}
 
 	args = append(args, runArgs()...)
-
 	runPrint(goCmd, append(args, pkgs...)...)
 }
 
@@ -467,6 +479,7 @@ func install(target target, tags []string) {
 
 	args := []string{"install", "-v", "-trimpath"}
 	args = appendParameters(args, tags, target.buildPkgs...)
+
 	runPrint(goCmd, args...)
 }
 
@@ -495,6 +508,9 @@ func build(target target, tags []string) {
 
 	args := []string{"build", "-v", "-trimpath"}
 	args = appendParameters(args, tags, target.buildPkgs...)
+
+	fmt.Printf("%v", args)
+
 	runPrint(goCmd, args...)
 }
 
@@ -559,7 +575,8 @@ func buildTar(target target) {
 	}
 
 	tarGz(filename, target.archiveFiles)
-	fmt.Println(filename)
+	fmt.Println()
+	fmt.Println("    ---> successful build archive: ", filename)
 }
 
 func buildZip(target target) {
@@ -582,7 +599,7 @@ func buildZip(target target) {
 	}
 
 	zipFile(filename, target.archiveFiles)
-	fmt.Println(filename)
+	fmt.Println("    ---> successful build archive: ", filename)
 }
 
 func buildDeb(target target) {
@@ -834,7 +851,12 @@ func transifex() {
 func ldflags(tags []string) string {
 	b := new(strings.Builder)
 	b.WriteString("-w")
+
+	fmt.Println(tags)
+
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Version=%s", version)
+	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.NocalhostVersion=%s", nocalhostVersion)
+	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Tags=%s", strings.Join(tags, ","))
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Stamp=%d", buildStamp())
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.User=%s", buildUser())
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Host=%s", buildHost())
@@ -1030,7 +1052,10 @@ func buildArch() string {
 }
 
 func archiveName(target target) string {
-	return fmt.Sprintf("%s-%s-%s", target.name, buildArch(), version)
+	n := fmt.Sprintf("%s-%s", target.name, buildArch())
+	fmt.Println("    ---> archive version: ", version)
+	fmt.Println("    ---> archive name: ", n)
+	return n
 }
 
 func runError(cmd string, args ...string) ([]byte, error) {

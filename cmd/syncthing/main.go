@@ -166,6 +166,7 @@ type RuntimeOptions struct {
 	dataDir          string
 	resetDatabase    bool
 	showVersion      bool
+	nocalhostVersion bool
 	showPaths        bool
 	showDeviceId     bool
 	doUpgrade        bool
@@ -257,6 +258,7 @@ func parseCommandLineOptions() RuntimeOptions {
 	flag.StringVar(&options.auditFile, "auditfile", options.auditFile, "Specify audit file (use \"-\" for stdout, \"--\" for stderr)")
 	flag.BoolVar(&options.allowNewerConfig, "allow-newer-config", false, "Allow loading newer than current config version")
 	flag.StringVar(&options.ignoreFilePath, "ignore-file-path", "", "Specify the path to get the ignore file runtime, or else get from root path of sync folder.")
+	flag.BoolVar(&options.nocalhostVersion, "nocalhost", false, "Show nocalhost version.")
 
 	if runtime.GOOS == "windows" {
 		// Allow user to hide the console window
@@ -341,6 +343,11 @@ func main() {
 
 	if options.showVersion {
 		fmt.Println(build.LongVersion)
+		return
+	}
+
+	if options.nocalhostVersion {
+		fmt.Println(build.NocalhostVersion)
 		return
 	}
 
@@ -614,10 +621,10 @@ func syncthingMain(runtimeOptions RuntimeOptions) {
 	}
 
 	cfg.SetIgnoredFilePath(runtimeOptions.ignoreFilePath)
-	if runtimeOptions.ignoreFilePath!="" {
-		l.Infof("Setting ignore file path to: %s",runtimeOptions.ignoreFilePath)
-	}else {
-		l.Warnf("No ignore file path sets, syncthing will use .stignore file on the root of the sync folder",runtimeOptions.ignoreFilePath)
+	if runtimeOptions.ignoreFilePath != "" {
+		l.Infof("Setting ignore file path to: %s", runtimeOptions.ignoreFilePath)
+	} else {
+		l.Warnf("No ignore file path sets, syncthing will use .stignore file on the root of the sync folder", runtimeOptions.ignoreFilePath)
 	}
 
 	// Candidate builds should auto upgrade. Make sure the option is set,
