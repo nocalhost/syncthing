@@ -12,8 +12,6 @@ build() {
 	go run build.go "$@"
 }
 
-nhversion="${3}"
-
 case "${1:-default}" in
 	test)
 		LOGGER_DISCARD=1 build test
@@ -34,24 +32,24 @@ case "${1:-default}" in
   artifact)
     case "${2:-all}" in
       mac)
-        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
       ;;
 
       linux)
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${nhversion}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${nhversion}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}" -version=v1.12.1
       ;;
 
       windows)
         build
-        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
       ;;
 
       all)
-        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${nhversion}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${nhversion}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${nhversion}"
-        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${nhversion}"
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}" -version=v1.12.1
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}" -version=v1.12.1
       ;;
     esac
     ;;
