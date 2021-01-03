@@ -1,4 +1,4 @@
-This is a customized version for nocalhost based on v1.12.0 b16cc72fc7b36b7e7ea26aebf7e2c9d81a48cf1b and support the following feature:
+This is a customized version for nocalhost based on v1.11.1 2b9cef3a and support the following feature:
 
 - supports specify random ignore file
 - supports all platform build script and inject nocalost version by using 'syncthing -nocalhost'
