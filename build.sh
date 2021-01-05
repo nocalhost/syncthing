@@ -12,6 +12,8 @@ build() {
 	go run build.go "$@"
 }
 
+VERSION=${3:-${VERSION}}
+
 case "${1:-default}" in
 	test)
 		LOGGER_DISCARD=1 build test
