@@ -161,37 +161,39 @@ var (
 
 type RuntimeOptions struct {
 	syncthing.Options
-	homeDir          string
-	confDir          string
-	dataDir          string
-	resetDatabase    bool
-	showVersion      bool
-	nocalhostVersion bool
-	showPaths        bool
-	showDeviceId     bool
-	doUpgrade        bool
-	doUpgradeCheck   bool
-	upgradeTo        string
-	noBrowser        bool
-	browserOnly      bool
-	hideConsole      bool
-	logFile          string
-	logMaxSize       int
-	logMaxFiles      int
-	auditEnabled     bool
-	auditFile        string
-	paused           bool
-	unpaused         bool
-	guiAddress       string
-	guiAPIKey        string
-	generateDir      string
-	noRestart        bool
-	cpuProfile       bool
-	stRestarting     bool
-	logFlags         int
-	showHelp         bool
-	allowNewerConfig bool
-	ignoreFilePath   string
+	homeDir           string
+	confDir           string
+	dataDir           string
+	resetDatabase     bool
+	showVersion       bool
+	nocalhostVersion  bool
+	nocalhostCommitId bool
+	gitVersion		  bool
+	showPaths         bool
+	showDeviceId      bool
+	doUpgrade         bool
+	doUpgradeCheck    bool
+	upgradeTo         string
+	noBrowser         bool
+	browserOnly       bool
+	hideConsole       bool
+	logFile           string
+	logMaxSize        int
+	logMaxFiles       int
+	auditEnabled      bool
+	auditFile         string
+	paused            bool
+	unpaused          bool
+	guiAddress        string
+	guiAPIKey         string
+	generateDir       string
+	noRestart         bool
+	cpuProfile        bool
+	stRestarting      bool
+	logFlags          int
+	showHelp          bool
+	allowNewerConfig  bool
+	ignoreFilePath    string
 }
 
 func defaultRuntimeOptions() RuntimeOptions {
@@ -259,6 +261,8 @@ func parseCommandLineOptions() RuntimeOptions {
 	flag.BoolVar(&options.allowNewerConfig, "allow-newer-config", false, "Allow loading newer than current config version")
 	flag.StringVar(&options.ignoreFilePath, "ignore-file-path", "", "Specify the path to get the ignore file runtime, or else get from root path of sync folder.")
 	flag.BoolVar(&options.nocalhostVersion, "nocalhost", false, "Show nocalhost version.")
+	flag.BoolVar(&options.nocalhostCommitId, "nocalhost-commit-id", false, "Show nocalhost commit id.")
+	flag.BoolVar(&options.gitVersion, "git-version", false, "Show commit id.")
 
 	if runtime.GOOS == "windows" {
 		// Allow user to hide the console window
@@ -348,6 +352,16 @@ func main() {
 
 	if options.nocalhostVersion {
 		fmt.Println(build.NocalhostVersion)
+		return
+	}
+
+	if options.nocalhostCommitId {
+		fmt.Println(build.NocalhostCommitId)
+		return
+	}
+
+	if options.gitVersion {
+		fmt.Println(build.GitVersion)
 		return
 	}
 

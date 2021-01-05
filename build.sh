@@ -12,7 +12,8 @@ build() {
 	go run build.go "$@"
 }
 
-VERSION=${3:-${VERSION}}
+VERSION=${3:-dev}
+NH_COMMIT_ID=${4:-dev}
 
 case "${1:-default}" in
 	test)
@@ -34,24 +35,23 @@ case "${1:-default}" in
   artifact)
     case "${2:-all}" in
       mac)
-        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}"
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
       ;;
 
       linux)
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
       ;;
 
       windows)
-        build
-        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}"
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
       ;;
 
       all)
-        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}"
-        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}"
-        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}"
+        build -cmd=zip -targetName=syncthing -goos=darwin -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
+        build -cmd=tar -targetName=syncthing -goos=linux -goarch=arm64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
+        build -cmd=zip -targetName=syncthing -goos=windows -goarch=amd64 -nocalhostVersion="${VERSION}" -nocalhostCommitId="${NH_COMMIT_ID}"
       ;;
     esac
     ;;

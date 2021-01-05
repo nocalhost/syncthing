@@ -34,22 +34,23 @@ import (
 )
 
 var (
-	goarch           string
-	goos             string
-	noupgrade        bool
-	version          string
-	goCmd            string
-	race             bool
-	debug            = os.Getenv("BUILDDEBUG") != ""
-	extraTags        string
-	installSuffix    string
-	pkgdir           string
-	cc               string
-	run              string
-	benchRun         string
-	nocalhostVersion string
-	_targetName      string
-	_cmd             string
+	goarch            string
+	goos              string
+	noupgrade         bool
+	version           string
+	goCmd             string
+	race              bool
+	debug             = os.Getenv("BUILDDEBUG") != ""
+	extraTags         string
+	installSuffix     string
+	pkgdir            string
+	cc                string
+	run               string
+	benchRun          string
+	nocalhostVersion  string
+	nocalhostCommitId string
+	_targetName       string
+	_cmd              string
 
 	debugBinary bool
 	coverage    bool
@@ -282,8 +283,9 @@ func main() {
 		}
 
 		fmt.Printf("\n")
-		fmt.Printf("    ---> building %s %s for env %s %s: \n", _cmd, _targetName, goos, goarch)
+		fmt.Printf("    ---> building %s %s for env %s %s \n", _cmd, _targetName, goos, goarch)
 		fmt.Printf("    ---> nocalhost versions: %s \n", nocalhostVersion)
+		fmt.Printf("    ---> nocalhost commit id: %s \n", nocalhostCommitId)
 		runCommand(_cmd, target)
 	}
 }
@@ -389,6 +391,7 @@ func parseFlags() {
 	flag.StringVar(&_cmd, "cmd", "install", "build cmd")
 	flag.StringVar(&_targetName, "targetName", "all", "build target name")
 	flag.StringVar(&nocalhostVersion, "nocalhostVersion", "", "nocalhost relative version")
+	flag.StringVar(&nocalhostCommitId, "nocalhostCommitId", "", "nocalhost relative commit id")
 	flag.Parse()
 }
 
@@ -856,6 +859,8 @@ func ldflags(tags []string) string {
 
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Version=%s", version)
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.NocalhostVersion=%s", nocalhostVersion)
+	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.NocalhostCommitId=%s", nocalhostCommitId)
+	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.GitVersion=%s", getGitVersionCompel())
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Tags=%s", strings.Join(tags, ","))
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.Stamp=%d", buildStamp())
 	fmt.Fprintf(b, " -X github.com/syncthing/syncthing/lib/build.User=%s", buildUser())
@@ -926,6 +931,10 @@ func getVersion() string {
 		return ver
 	}
 	// ... then see if we have a Git tag.
+	return getGitVersionCompel()
+}
+
+func getGitVersionCompel() string {
 	if ver, err := getGitVersion(); err == nil {
 		if strings.Contains(ver, "-") {
 			// The version already contains a hash and stuff. See if we can
@@ -1053,8 +1062,8 @@ func buildArch() string {
 
 func archiveName(target target) string {
 	n := fmt.Sprintf("%s-%s", target.name, buildArch())
-	fmt.Println("    ---> archive version: ", version)
-	fmt.Println("    ---> archive name: ", n)
+	fmt.Println("    ---> archive version:", version)
+	fmt.Println("    ---> archive name:", n)
 	return n
 }
 
