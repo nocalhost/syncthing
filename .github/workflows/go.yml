@@ -71,7 +71,7 @@ jobs:
       - name: Build syncthing
         working-directory: ./syncthing-source
         run: |
-          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion=${GITHUB_REF#refs/*/}" -nocalhostCommitId="${GITHUB_SHA}"
+          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion="${GITHUB_REF#refs/*/}" -nocalhostCommitId="${GITHUB_SHA}"
 
       - name: Push to Coding Articact
         working-directory: ./syncthing-source
