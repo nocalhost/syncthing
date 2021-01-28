@@ -59,7 +59,7 @@ jobs:
           go-version: ^1.15.6
 
       - name: Get tag
-        run: echo "::set-env name=tag::$(($env:GITHUB_REF#refs/*/)"
+        run: echo "::set-env name=tag::$(($env:GITHUB_REF -split '/')[-1] -replace ' ','')"
 
       - name: Checkout syncthing
         uses: actions/checkout@v2.3.4
