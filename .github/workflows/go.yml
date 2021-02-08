@@ -58,11 +58,6 @@ jobs:
         with:
           go-version: ^1.15.6
 
-      - name: Get tag
-        run: |
-         $branchName = "${{github.ref}}".Split("/")["${{github.ref}}".Split("/").Length -1]
-         echo "RELEASE_VERSION=$branchName" >> $GITHUB_ENV
-
       - name: Checkout syncthing
         uses: actions/checkout@v2.3.4
         with:
@@ -73,7 +68,8 @@ jobs:
       - name: Build syncthing
         working-directory: ./syncthing-source
         run: |
-          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion=$RELEASE_VERSION -nocalhostCommitId=$GITHUB_SHA
+          go run $RELEASE_VERSION = "${{github.ref}}".Split("/")["${{github.ref}}".Split("/").Length -1]
+          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion="${RELEASE_VERSION}" -nocalhostCommitId=%GITHUB_SHA%
 
       - name: Push to Coding Articact
         working-directory: ./syncthing-source
