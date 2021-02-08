@@ -59,7 +59,7 @@ jobs:
           go-version: ^1.15.6
 
       - name: Get tag
-        run: echo ("::set-env name=BRANCH_NAME::" + $env:GITHUB_REF.replace('refs/heads/', ''))
+        run: echo ("::set-env name=RELEASE_VERSION::" + $env:GITHUB_REF.replace('refs/heads/', ''))
 
       - name: Checkout syncthing
         uses: actions/checkout@v2.3.4
