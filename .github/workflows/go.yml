@@ -73,9 +73,9 @@ jobs:
       - name: Build syncthing
         working-directory: ./syncthing-source
         run: |
-          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion=%RELEASE_VERSION% -nocalhostCommitId=%GITHUB_SHA%
+          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion=$RELEASE_VERSION -nocalhostCommitId=$GITHUB_SHA
 
       - name: Push to Coding Articact
         working-directory: ./syncthing-source
         run: |
-          curl -T syncthing-windows-amd64.zip -u ${{ secrets.CODING_ARTIFACTS_USER }}:${{ secrets.CODING_ARTIFACTS_PASS }} "https://codingcorp-generic.pkg.coding.net/nocalhost/syncthing/syncthing-windows-amd64.zip?version=%RELEASE_VERSION%"
+          curl -T syncthing-windows-amd64.zip -u ${{ secrets.CODING_ARTIFACTS_USER }}:${{ secrets.CODING_ARTIFACTS_PASS }} "https://codingcorp-generic.pkg.coding.net/nocalhost/syncthing/syncthing-windows-amd64.zip?version=$RELEASE_VERSION"
