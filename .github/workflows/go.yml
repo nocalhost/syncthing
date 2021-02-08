@@ -61,7 +61,6 @@ jobs:
       - name: Get tag
         run: |
          $branchName = "${{github.ref}}".Split("/")["${{github.ref}}".Split("/").Length -1]
-         echo "::set-env name=RELEASE_VERSION::$(echo $branchName)"
          echo "RELEASE_VERSION=$branchName" >> $GITHUB_ENV
          echo "${RELEASE_VERSION}"
 
