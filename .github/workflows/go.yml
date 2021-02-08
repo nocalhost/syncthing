@@ -68,8 +68,8 @@ jobs:
       - name: Build syncthing
         working-directory: ./syncthing-source
         run: |
-          go run $RELEASE_VERSION = "${{github.ref}}".Split("/")["${{github.ref}}".Split("/").Length -1]
-          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion="${RELEASE_VERSION}" -nocalhostCommitId=%GITHUB_SHA%
+          set RELEASE_VERSION="${{github.ref}}".Split("/")["${{github.ref}}".Split("/").Length -1]
+          go run build.go -targetName=syncthing -cmd=zip -nocalhostVersion="$RELEASE_VERSION" -nocalhostCommitId=%GITHUB_SHA%
 
       - name: Push to Coding Articact
         working-directory: ./syncthing-source
